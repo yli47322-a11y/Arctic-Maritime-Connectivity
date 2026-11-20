@@ -1,0 +1,16 @@
+numpy
+scipy
+numba
+pandas
+h5netcdf
+h5py
+rasterio
+pyproj
+pyshp
+shapely
+matplotlib
+Pillow
+requests
+openpyxl
+affine
+python-pptx

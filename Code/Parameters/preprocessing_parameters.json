@@ -1,0 +1,125 @@
+{
+  "version": "PIOMAS_5km_preprocessing_v1",
+  "approved_date": "2026-11-04",
+  "status": "workflow_accepted_one_month_processed",
+  "data_source": {
+    "product": "PIOMAS",
+    "version": "2.1",
+    "concentration": "aiday",
+    "thickness": "hiday",
+    "thickness_definition": "ice_volume_per_total_grid_area_effective_thickness",
+    "thickness_conversion_during_preprocessing": "none",
+    "source_grid": [
+      120,
+      360
+    ],
+    "variables_processed_independently": true,
+    "source_url_concentration": "https://pscfiles.apl.washington.edu/zhang/PIOMAS/data/v2.1/area/",
+    "source_url_thickness": "https://pscfiles.apl.washington.edu/zhang/PIOMAS/data/v2.1/hiday/"
+  },
+  "grid": {
+    "spacing_m": 5000,
+    "shape": [
+      2203,
+      1523
+    ],
+    "projection": "+proj=stere +lon_0=-45 +lat_0=90 +k=1 +R=6378273 +no_defs",
+    "upper_left_edge_m": [
+      -3807000,
+      5507000
+    ],
+    "land_mask": "正式成果\\空间基准_5km_最终正式版_v3_全量最近出海_2026-11-04\\03_正式5km栅格\\land_mask_5km.tif",
+    "AMAP_mask": "正式成果\\空间基准_5km_最终正式版_v3_全量最近出海_2026-11-04\\03_正式5km栅格\\AMAP_mask_5km.tif",
+    "land_mask_priority": "authoritative_unchanged"
+  },
+  "nodes": {
+    "settlement_records": 4258,
+    "settlement_land_cells": 2748,
+    "departure_cells": 1248,
+    "mode": "frozen_current_registry_no_monthly_remapping",
+    "directory": "预处理\\PIOMAS_5km_标准流程_v1\\固定点位",
+    "settlement_table": "聚居点_4258条.csv",
+    "departure_table": "出发格.csv",
+    "relation_table": "聚居点与出发格对应.csv",
+    "legacy_1235_registry_not_used_by_this_workflow": true
+  },
+  "domain": {
+    "study_and_settlement_scope": "original_AMAP",
+    "marine_computation_scope": "within fixed full raster: formal sea AND (AMAP OR latitude<=70N)",
+    "outside_AMAP_assumed_ice_free": "formal sea AND NOT AMAP AND latitude<=70N",
+    "ten_km_buffer": false,
+    "latitude_boundary_inclusive": true,
+    "land_is_never_overwritten_as_sea": true
+  },
+  "sequence": [
+    "read_native_daily_variables",
+    "interpolate_native_missing",
+    "linear_resample_to_fixed_5km_grid",
+    "apply_fixed_land_mask",
+    "zero_remaining_missing_marine_values",
+    "zero_outside_AMAP_marine_latitude_le70N",
+    "zero_all_frozen_departure_cells",
+    "save_data_masks_provenance_and_relations"
+  ],
+  "native_missing_interpolation": {
+    "algorithm": "projected Delaunay triangulation with barycentric linear interpolation",
+    "support": "native source-ocean finite values for each variable independently",
+    "source_land_treatment": "masked as unavailable before interpolation; reconstructed values not original model ocean output",
+    "preserve_native_valid_values": true,
+    "outside_support_convex_hull": "retain_missing_until_final_marine_zero_assignment",
+    "temporal_interpolation": false
+  },
+  "resampling": {
+    "algorithm": "projected Delaunay barycentric linear interpolation from reconstructed native grid",
+    "information_resolution_improved": false
+  },
+  "secondary_interpolation": {
+    "enabled": false
+  },
+  "zero_assignment": {
+    "remaining_marine_missing": true,
+    "outside_AMAP_latitude_le70N": true,
+    "all_departure_cells": true,
+    "concentration_value": 0,
+    "effective_thickness_value_m": 0,
+    "preserve_already_valid_other_variable_when_only_one_is_missing": true,
+    "assignments_are_explicit_assumptions_not_observed_ice_free": true
+  },
+  "outputs": [
+    "daily_siconc",
+    "daily_sithick_effective",
+    "land_mask",
+    "AMAP_mask",
+    "marine_computation_domain_mask",
+    "outside_assumed_ice_free_mask",
+    "native_gap_interpolation_provenance",
+    "remaining_missing_zero_flags_per_variable",
+    "departure_zero_mask",
+    "source_and_grid_metadata",
+    "frozen_nodes_and_correspondence"
+  ],
+  "routine_feasibility_tests": {
+    "included": false,
+    "note": "one-off blocked-node, all-ice-free connectivity and daily reinforcement tests remain pilot evidence, not standard preprocessing steps"
+  },
+  "one_month_implementation": {
+    "period": "2025-01-01/2025-01-31",
+    "current_result_directory": "数据选优\\PIOMAS_2025年1月_插值掩膜预实验\\AMAP外70N以南无冰_无10km缓冲",
+    "all_history_processing_started": false
+  },
+  "source_calendar_note": "PIOMAS has 365 source daily fields per year; keep source day indices and calendar metadata explicit. The January pilot does not define a fabricated leap-year extra day.",
+  "ice_pair_correction": {
+    "version": "joint_nearest_sea_ring_v1",
+    "status": "complete",
+    "mode": "in_place_atomic_per_month",
+    "spatial_scope": "AMAP sea only, excluding fixed departures",
+    "rules": "Set anomalies to zero in both variables, then replace using joint means of valid paired donors at the first occupied four-neighbor sea distance. Exclude forced ice-free and residual zero-fill donors.",
+    "max_steps": 5,
+    "max_sea_distance_km": 25,
+    "report": "正式数据/PIOMAS_5km_预处理_v1/异常格修正状态.json",
+    "provenance_bits": {
+      "4": "joint interpolation",
+      "8": "fallback ice-free"
+    }
+  }
+}
